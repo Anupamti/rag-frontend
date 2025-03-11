@@ -172,10 +172,10 @@ export default function ChatInput({
   };
   
   return (
-    <form onSubmit={handleSubmit} className="relative">
+    <form onSubmit={handleSubmit} className="relative w-full">
       <textarea
         ref={textareaRef}
-        className="w-full px-4 py-3 pr-20 rounded-lg border text-black border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 resize-none min-h-[52px] max-h-[200px]"
+        className="w-full px-4 py-3 pr-24 rounded-lg border text-black border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 resize-none min-h-[52px] max-h-[200px]"
         placeholder="Message..."
         value={value}
         onChange={(e) => {
@@ -188,16 +188,17 @@ export default function ChatInput({
         rows={1}
       />
       
-      <div className="absolute right-2 bottom-2 flex space-x-1 items-center">
-        {/* Audio visualizer */}
+      {/* Container for visualizer and buttons with fixed positioning */}
+      <div className="absolute right-2 bottom-1 flex items-center">
+        {/* Audio visualizer - reduced size for mobile */}
         {isRecording && audioLevel.length > 0 && (
-          <div className="flex items-end h-8 space-x-1 mr-2">
+          <div className="flex items-end h-6 space-x-px mr-2">
             {audioLevel.map((level, index) => (
               <div 
                 key={index}
                 className="w-1 bg-red-500 rounded-t"
                 style={{ 
-                  height: `${Math.max(4, level * 24)}px`,
+                  height: `${Math.max(3, level * 18)}px`,
                   transition: 'height 0.1s ease'
                 }}
               />
@@ -205,58 +206,72 @@ export default function ChatInput({
           </div>
         )}
         
-        {/* Voice recording button */}
-        <button
-          type="button"
-          className={`p-2 mb-2 h-10  rounded-full ${
-            isRecording 
-              ? 'text-red-500 bg-red-50'
-              : isTranscribing
-                ? 'text-yellow-500 bg-yellow-50'
-                : 'text-gray-400 hover:text-indigo-500 hover:bg-gray-100'
-          }`}
-          onClick={isRecording ? stopRecording : startRecording}
-          disabled={disabled || isTranscribing}
-        >
-          {isRecording ? (
-            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor" stroke="none">
-              <rect x="6" y="6" width="12" height="12" rx="2" />
-            </svg>
-          ) : isTranscribing ? (
-            <div className="flex items-center">
-              <div className="animate-spin mr-2">
-                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <div className="flex space-x-2">
+          {/* Voice recording button - fixed width for consistency */}
+          <button
+            type="button"
+            className={`flex items-center justify-center w-10 h-10 rounded-full ${
+              isRecording 
+                ? 'text-red-500 bg-red-50'
+                : isTranscribing
+                  ? 'text-yellow-500 bg-yellow-50'
+                  : 'text-gray-400 hover:text-indigo-500 hover:bg-gray-100'
+            }`}
+            onClick={isRecording ? stopRecording : startRecording}
+            disabled={disabled || isTranscribing}
+            aria-label={isRecording ? "Stop recording" : "Start recording"}
+          >
+            {isRecording ? (
+              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+                <rect x="6" y="6" width="12" height="12" rx="2" />
+              </svg>
+            ) : isTranscribing ? (
+              <div className="animate-spin">
+                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <circle cx="12" cy="12" r="10" strokeDasharray="30 30" strokeDashoffset="0" />
                   <path d="M12 2C6.5 2 2 6.5 2 12" />
                 </svg>
               </div>
-              <span className="text-xs whitespace-nowrap">Transcribing...</span>
-            </div>
-          ) : (
+            ) : (
+              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
+                <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+                <line x1="12" y1="19" x2="12" y2="23" />
+                <line x1="8" y1="23" x2="16" y2="23" />
+              </svg>
+            )}
+          </button>
+          
+          {/* Send button - fixed width for consistency */}
+          <button
+            type="submit"
+            className={`flex items-center justify-center w-10 h-10 rounded-full ${
+              value.trim() && !disabled
+                ? 'text-indigo-600 hover:bg-indigo-100' 
+                : 'text-gray-300 cursor-not-allowed'
+            }`}
+            disabled={!value.trim() || disabled}
+            aria-label="Send message"
+          >
             <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
-              <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
-              <line x1="12" y1="19" x2="12" y2="23" />
-              <line x1="8" y1="23" x2="16" y2="23" />
+              <path d="M22 2L11 13M22 2L15 22L11 13L2 9L22 2Z" />
             </svg>
-          )}
-        </button>
-        
-        {/* Send button */}
-        <button
-          type="submit"
-          className={`p-2 mb-2 h-10  rounded-full ${
-            value.trim() && !disabled
-              ? 'text-indigo-600 hover:bg-indigo-100' 
-              : 'text-gray-300 cursor-not-allowed'
-          }`}
-          disabled={!value.trim() || disabled}
-        >
-          <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M22 2L11 13M22 2L15 22L11 13L2 9L22 2Z" />
-          </svg>
-        </button>
+          </button>
+        </div>
       </div>
+      
+      {/* Transcribing indicator - shown below textarea when active */}
+      {isTranscribing && (
+        <div className="absolute left-4 -bottom-6 flex items-center text-yellow-500 text-xs">
+          <div className="animate-spin mr-1">
+            <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="12" cy="12" r="10" strokeDasharray="30 30" strokeDashoffset="0" />
+              <path d="M12 2C6.5 2 2 6.5 2 12" />
+            </svg>
+          </div>
+          <span>Transcribing...</span>
+        </div>
+      )}
     </form>
   );
 }
