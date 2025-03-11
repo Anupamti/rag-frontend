@@ -208,7 +208,7 @@ export default function ChatInput({
         {/* Voice recording button */}
         <button
           type="button"
-          className={`p-2 rounded-full ${
+          className={`p-2 mb-2 h-10  rounded-full ${
             isRecording 
               ? 'text-red-500 bg-red-50'
               : isTranscribing
@@ -245,7 +245,7 @@ export default function ChatInput({
         {/* Send button */}
         <button
           type="submit"
-          className={`p-2 rounded-full ${
+          className={`p-2 mb-2 h-10  rounded-full ${
             value.trim() && !disabled
               ? 'text-indigo-600 hover:bg-indigo-100' 
               : 'text-gray-300 cursor-not-allowed'
