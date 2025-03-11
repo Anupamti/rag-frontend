@@ -1,7 +1,5 @@
-
-// File: components/ChatInput.tsx
 import { transcribeAudio } from '@/utils/transcription';
-import { useState, useRef, FormEvent, KeyboardEvent } from 'react';
+import { useState, useRef, FormEvent, KeyboardEvent, useEffect } from 'react';
 
 interface ChatInputProps {
   value: string;
@@ -20,9 +18,13 @@ export default function ChatInput({
 }: ChatInputProps) {
   const [isRecording, setIsRecording] = useState<boolean>(false);
   const [isTranscribing, setIsTranscribing] = useState<boolean>(false);
+  const [audioLevel, setAudioLevel] = useState<number[]>([]);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const animationFrameRef = useRef<number | null>(null);
   
   // Auto-resize textarea
   const handleInput = () => {
@@ -61,10 +63,34 @@ export default function ChatInput({
     }
   };
   
+  // Clean up audio resources
+  useEffect(() => {
+    return () => {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+      if (audioContextRef.current) {
+        audioContextRef.current.close();
+      }
+    };
+  }, []);
+  
   // Start recording
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      
+      // Set up audio context and analyzer for visualization
+      audioContextRef.current = new AudioContext();
+      analyserRef.current = audioContextRef.current.createAnalyser();
+      analyserRef.current.fftSize = 32; // Small for simple visualization
+      
+      const source = audioContextRef.current.createMediaStreamSource(stream);
+      source.connect(analyserRef.current);
+      
+      // Start visualization
+      visualizeAudio();
+      
       mediaRecorderRef.current = new MediaRecorder(stream, {
         mimeType: 'audio/webm'
       });
@@ -79,6 +105,12 @@ export default function ChatInput({
         const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
         audioChunksRef.current = [];
         
+        // Stop visualization
+        if (animationFrameRef.current) {
+          cancelAnimationFrame(animationFrameRef.current);
+          animationFrameRef.current = null;
+        }
+        
         setIsTranscribing(true);
         try {
           const transcribedText = await transcribeAudio(audioBlob);
@@ -88,6 +120,7 @@ export default function ChatInput({
           console.error('Transcription error:', error);
         } finally {
           setIsTranscribing(false);
+          setAudioLevel([]); // Clear visualizer
         }
       };
   
@@ -98,16 +131,43 @@ export default function ChatInput({
     }
   };
   
+  // Visualize audio
+  const visualizeAudio = () => {
+    if (!analyserRef.current) return;
+    
+    const bufferLength = analyserRef.current.frequencyBinCount;
+    const dataArray = new Uint8Array(bufferLength);
+    
+    const updateVisualizer = () => {
+      if (!analyserRef.current) return;
+      
+      analyserRef.current.getByteFrequencyData(dataArray);
+      
+      // Sample a few values from the frequency data for visualization
+      const levels = Array.from({ length: 5 }, (_, i) => {
+        const index = Math.floor(i * (bufferLength / 5));
+        return dataArray[index] / 255; // Normalize to 0-1
+      });
+      
+      setAudioLevel(levels);
+      animationFrameRef.current = requestAnimationFrame(updateVisualizer);
+    };
+    
+    updateVisualizer();
+  };
+  
   // Stop recording
   const stopRecording = () => {
     if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
       mediaRecorderRef.current.stop();
       setIsRecording(false);
       
-      // Add a small delay to ensure final data is processed
-      setTimeout(() => {
-        setIsTranscribing(true);
-      }, 500);
+      // Clean up audio context
+      if (audioContextRef.current) {
+        audioContextRef.current.close();
+        audioContextRef.current = null;
+        analyserRef.current = null;
+      }
     }
   };
   
@@ -128,13 +188,29 @@ export default function ChatInput({
         rows={1}
       />
       
-      <div className="absolute right-2 bottom-2 flex space-x-1">
+      <div className="absolute right-2 bottom-2 flex space-x-1 items-center">
+        {/* Audio visualizer */}
+        {isRecording && audioLevel.length > 0 && (
+          <div className="flex items-end h-8 space-x-1 mr-2">
+            {audioLevel.map((level, index) => (
+              <div 
+                key={index}
+                className="w-1 bg-red-500 rounded-t"
+                style={{ 
+                  height: `${Math.max(4, level * 24)}px`,
+                  transition: 'height 0.1s ease'
+                }}
+              />
+            ))}
+          </div>
+        )}
+        
         {/* Voice recording button */}
         <button
           type="button"
           className={`p-2 rounded-full ${
             isRecording 
-              ? 'text-red-500 bg-red-50 animate-pulse'
+              ? 'text-red-500 bg-red-50'
               : isTranscribing
                 ? 'text-yellow-500 bg-yellow-50'
                 : 'text-gray-400 hover:text-indigo-500 hover:bg-gray-100'
@@ -142,8 +218,20 @@ export default function ChatInput({
           onClick={isRecording ? stopRecording : startRecording}
           disabled={disabled || isTranscribing}
         >
-          {isTranscribing ? (
-            <span className="text-xs whitespace-nowrap px-1">Transcribing...</span>
+          {isRecording ? (
+            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+              <rect x="6" y="6" width="12" height="12" rx="2" />
+            </svg>
+          ) : isTranscribing ? (
+            <div className="flex items-center">
+              <div className="animate-spin mr-2">
+                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <circle cx="12" cy="12" r="10" strokeDasharray="30 30" strokeDashoffset="0" />
+                  <path d="M12 2C6.5 2 2 6.5 2 12" />
+                </svg>
+              </div>
+              <span className="text-xs whitespace-nowrap">Transcribing...</span>
+            </div>
           ) : (
             <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
