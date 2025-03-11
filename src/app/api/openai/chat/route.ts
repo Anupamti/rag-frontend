@@ -59,13 +59,13 @@ export async function POST(request: Request) {
               data: JSON.parse(data)
             });
           } catch (e) {
-            reject(new Error(`Failed to parse response: ${e.message}`));
+            reject(new Error(`Failed to parse response: ${e}`));
           }
         });
       });
 
       req.on('error', (e) => {
-        reject(new Error(`Request error: ${e.message}`));
+        reject(new Error(`Request error: ${e}`));
       });
 
       req.on('timeout', () => {
