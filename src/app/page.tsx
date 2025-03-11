@@ -108,8 +108,8 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Head>
-        <title>AI Assistant</title>
-        <meta name="description" content="AI Assistant with voice transcription" />
+        <title>POPPY AI </title>
+        <meta name="description" content="POPPY AI  with voice transcription" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
 

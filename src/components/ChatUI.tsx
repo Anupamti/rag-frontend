@@ -30,7 +30,7 @@ export default function ChatUI({
             <path d="M16 16C15.45 16 15 16.45 15 17V22C15 22.55 15.45 23 16 23C16.55 23 17 22.55 17 22V17C17 16.45 16.55 16 16 16Z" fill="currentColor"/>
           </svg>
         </div>
-        <h1 className="text-xl font-medium text-gray-800">AI Assistant</h1>
+        <h1 className="text-xl font-medium text-gray-800">POPPY AI </h1>
       </header>
       
       {/* Chat messages area */}
