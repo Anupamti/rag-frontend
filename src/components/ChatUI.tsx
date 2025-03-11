@@ -39,7 +39,6 @@ export default function ChatUI({
           <div className="h-full flex flex-col items-center justify-center text-gray-500">
             <h2 className="text-2xl font-semibold mb-2">How can I help you today?</h2>
             <p className="text-center max-w-md">
-              Ask me anything, from creative tasks to factual questions. 
               You can also use the microphone button to speak your questions.
             </p>
           </div>
