@@ -9,9 +9,11 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@deepgram/sdk": "^3.11.2",
     "@types/formidable": "^3.4.5",
     "assemblyai": "^4.9.0",
     "axios": "^1.8.2",
+    "cross-fetch": "^4.1.0",
     "formidable": "^3.5.2",
     "next": "15.2.1",
     "node-fetch": "^3.3.2",

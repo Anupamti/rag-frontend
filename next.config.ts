@@ -7,8 +7,8 @@ const nextConfig: NextConfig = {
   async rewrites() {
     return [
       {
-           source: '/api/openai/:path*',
-        destination: 'https://api.openai.com/v1/:path*'
+        source: "/api/openai/:path*",
+        destination: "https://api.openai.com/v1/:path*",
       },
     ];
   },
