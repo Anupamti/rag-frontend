@@ -1,126 +1,86 @@
-"use client"
+"use client";
 
-// File: pages/index.tsx
-import { useState, useEffect } from 'react';
-import Head from 'next/head';
-import { v4 as uuidv4 } from 'uuid';
-import { Message } from '../types';
-import ChatUI from '@/components/ChatUI';
+import { useState } from "react";
+import Head from "next/head";
+import { Message } from "../types";
+import ChatContainer from "@/components/ChatContainer";
+import Header from "@/components/Header";
+import Sidebar from "@/components/Sidebar";
+import { resetServerState } from "@/lib/apiRoutes";
+import { useChatState } from "@/hooks/useChatState";
 
 export default function Home() {
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [inputValue, setInputValue] = useState<string>('');
+  const { messages, setMessages, uploadedFiles, setUploadedFiles } =
+    useChatState();
+  const [inputValue, setInputValue] = useState<string>("");
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
-  
-  // Load messages from localStorage on initial load
-  useEffect(() => {
-    const savedMessages = localStorage.getItem('chatMessages');
-    if (savedMessages) {
-      try {
-        const parsedMessages = JSON.parse(savedMessages);
-        // Convert string timestamps back to Date objects
-        const messagesWithDates = parsedMessages.map((msg: any) => ({
-          ...msg,
-          timestamp: new Date(msg.timestamp)
-        }));
-        setMessages(messagesWithDates);
-      } catch (error) {
-        console.error('Failed to parse saved messages:', error);
-      }
-    }
-  }, []);
-  
-  // Save messages to localStorage whenever they change
-  useEffect(() => {
-    if (messages.length > 0) {
-      localStorage.setItem('chatMessages', JSON.stringify(messages));
-    }
-  }, [messages]);
-  
-  const handleSendMessage = async () => {
-    if (!inputValue.trim()) return;
-    
-    // Create a new user message
-    const userMessage: Message = {
-      id: uuidv4(),
-      role: 'user',
-      content: inputValue,
-      timestamp: new Date()
+  const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
+
+  const handleFileUpload = (file: any) => {
+    setUploadedFiles((prev) => [...prev, file]);
+
+    const fileMessage: Message = {
+      id: Date.now().toString(),
+      role: "system",
+      content: `File "${file.name}" has been uploaded successfully. You can now ask questions about this document.`,
+      timestamp: new Date(),
     };
-    
-    // Add user message to the chat
-    setMessages(prev => [...prev, userMessage]);
-    setInputValue('');
-    setIsProcessing(true);
-    
-    try {
-      // Call your API endpoint
-      const response = await fetch('/api/openai/chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          message: inputValue,
-          history: messages.map(msg => ({
-            role: msg.role,
-            content: msg.content
-          }))
-        }),
-      });
-      
-      if (!response.ok) {
-        throw new Error(`API returned status ${response.status}`);
-      }
-      
-      const data = await response.json();
-      
-      // Add assistant message to the chat
-      const assistantMessage: Message = {
-        id: uuidv4(),
-        role: 'assistant',
-        content: data.reply,
-        timestamp: new Date()
-      };
-      
-      setMessages(prev => [...prev, assistantMessage]);
-    } catch (error) {
-      console.error('Error communicating with AI service:', error);
-      // Optionally add an error message to the chat
-      setMessages(prev => [
-        ...prev,
-        {
-          id: uuidv4(),
-          role: 'assistant',
-          content: "I'm sorry, I encountered an error processing your request. Please try again.",
-          timestamp: new Date()
-        }
-      ]);
-    } finally {
-      setIsProcessing(false);
-    }
+    setMessages((prev) => [...prev, fileMessage]);
   };
-  
-  const handleTranscribedText = (text: string) => {
-    setInputValue(prev => prev + (prev ? ' ' : '') + text);
+
+  const handleDeleteFile = (fileId: string) => {
+    setUploadedFiles((prev) => prev.filter((file) => file.id !== fileId));
+  };
+
+  const clearChat = () => {
+    setMessages([]);
+    localStorage.removeItem("chatMessages"); // Optional: you can also abstract this into hook
+  };
+
+  const clearFiles = async () => {
+    setUploadedFiles([]);
+    localStorage.removeItem("uploadedFiles"); // Optional cleanup
+    try {
+      await resetServerState();
+      console.log("Server reset successfully");
+    } catch (error: any) {
+      console.error("Error during reset:", error.message);
+    }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 flex">
       <Head>
-        <title>POPPY AI </title>
-        <meta name="description" content="POPPY AI  with voice transcription" />
+        <title>Document Chat Assistant</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <ChatUI 
-        messages={messages}
-        inputValue={inputValue}
-        setInputValue={setInputValue}
-        handleSendMessage={handleSendMessage}
-        isProcessing={isProcessing}
-        onTranscribedText={handleTranscribedText}
+      <Sidebar
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+        uploadedFiles={uploadedFiles}
+        onFileUpload={handleFileUpload}
+        onDeleteFile={handleDeleteFile}
+        onClearChat={clearChat}
+        onClearFiles={clearFiles}
       />
+
+      <div className="flex-1 flex flex-col">
+        <Header
+          onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+          fileCount={uploadedFiles.length}
+        />
+
+        <ChatContainer
+          messages={messages}
+          setMessages={setMessages}
+          inputValue={inputValue}
+          setInputValue={setInputValue}
+          isProcessing={isProcessing}
+          setIsProcessing={setIsProcessing}
+          uploadedFiles={uploadedFiles}
+        />
+      </div>
     </div>
   );
 }
