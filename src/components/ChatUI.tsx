@@ -44,7 +44,7 @@ export default function ChatUI({
             />
           </svg>
         </div>
-        <h1 className="text-xl font-medium text-gray-800">Nano AI </h1>
+        <h1 className="text-xl font-medium text-gray-800">Doc AI </h1>
       </header>
 
       {/* Chat messages area */}

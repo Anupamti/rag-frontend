@@ -34,12 +34,10 @@ export default function Home() {
 
   const clearChat = () => {
     setMessages([]);
-    localStorage.removeItem("chatMessages"); // Optional: you can also abstract this into hook
   };
 
   const clearFiles = async () => {
     setUploadedFiles([]);
-    localStorage.removeItem("uploadedFiles"); // Optional cleanup
     try {
       await resetServerState();
       console.log("Server reset successfully");
