@@ -31,7 +31,7 @@ export default function FileUploader({ onFileUpload }: FileUploaderProps) {
   const handleFileChange = (file: File) => {
     if (!supportedTypes.includes(file.type)) {
       setErrorMessage(
-        "File type not supported. Please upload PDF, DOC, DOCX, TXT, CSV, or Excel files."
+        "File type not supported. Please upload PDF, DOC, DOCX, TXT"
       );
       setUploadStatus("error");
       return;
@@ -148,7 +148,7 @@ export default function FileUploader({ onFileUpload }: FileUploaderProps) {
           type="file"
           onChange={handleInputChange}
           className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-          accept=".pdf,.doc,.docx,.txt,.csv,.xls,.xlsx"
+          accept=".pdf,.doc,.docx,.txt"
         />
 
         {!selectedFile ? (
@@ -162,7 +162,7 @@ export default function FileUploader({ onFileUpload }: FileUploaderProps) {
                 </span>
               </p>
               <p className="text-xs text-gray-500 mt-1">
-                Supports PDF, DOC, DOCX, TXT, CSV, Excel (max 10MB)
+                Supports PDF, DOC, DOCX, TXT(max 10MB)
               </p>
             </div>
           </div>
@@ -230,7 +230,6 @@ export default function FileUploader({ onFileUpload }: FileUploaderProps) {
         <p>• PDF documents</p>
         <p>• Microsoft Word (DOC, DOCX)</p>
         <p>• Plain text files (TXT)</p>
-        <p>• CSV and Excel files (XLS, XLSX)</p>
       </div>
     </div>
   );

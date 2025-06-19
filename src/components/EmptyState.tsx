@@ -55,7 +55,7 @@ export default function EmptyState({ uploadedFiles }: EmptyStateProps) {
                 about their content.
               </p>
               <div className="text-sm text-blue-600 space-y-1">
-                <p>✓ PDF, Word, Excel, and text files supported</p>
+                <p>✓ PDF, Word, and text files supported</p>
                 <p>✓ Secure and private processing</p>
                 <p>✓ Instant analysis and insights</p>
               </div>
