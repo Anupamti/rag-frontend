@@ -18,6 +18,8 @@ interface ChatContainerProps {
   uploadedFiles: any[];
 }
 
+type QueryType = "policy_check" | "recommendation" | "cross_reference" | "";
+
 export default function ChatContainer({
   messages,
   setMessages,
@@ -28,6 +30,14 @@ export default function ChatContainer({
   uploadedFiles,
 }: ChatContainerProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [queryType, setQueryType] = useState<QueryType>("");
+
+  const queryTypeOptions = [
+    { value: "policy_check", label: "Policy Check" },
+    { value: "recommendation", label: "Recommendation" },
+    { value: "cross_reference", label: "Cross Reference" },
+    { value: "", label: "General" },
+  ];
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -52,7 +62,7 @@ export default function ChatContainer({
     setIsProcessing(true);
 
     try {
-      const data = await askQuestion(inputValue);
+      const data = await askQuestion(inputValue, queryType);
 
       const assistantMessage: Message = {
         id: uuidv4(),
@@ -121,6 +131,30 @@ export default function ChatContainer({
           />
         )}
         <div ref={messagesEndRef} />
+      </div>
+
+      {/* Query Type Selector */}
+      <div className="px-4 py-2 border-t bg-gray-50">
+        <div className="flex items-center gap-2">
+          <label
+            htmlFor="queryType"
+            className="text-sm font-medium text-gray-700"
+          >
+            Query Type:
+          </label>
+          <select
+            id="queryType"
+            value={queryType}
+            onChange={(e) => setQueryType(e.target.value as QueryType)}
+            className="px-3 py-1 text-sm border  border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
+          >
+            {queryTypeOptions.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
       <ChatInput
