@@ -32,10 +32,10 @@ export default function EmptyState({ uploadedFiles }: EmptyStateProps) {
         {/* Welcome Message */}
         <div className="space-y-3">
           <h1 className="text-3xl font-bold text-gray-900">
-            Welcome to Doc AI
+            Welcome to CaseBase
           </h1>
           <p className="text-lg text-gray-600">
-            Your intelligent document chat assistant
+            Guiding You Through Every Document and Dialogue
           </p>
         </div>
 

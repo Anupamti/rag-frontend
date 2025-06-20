@@ -21,7 +21,7 @@ export default function Header({ onToggleSidebar, fileCount }: HeaderProps) {
 
         <div className="flex items-center space-x-2">
           <Bot className="h-6 w-6 text-blue-600" />
-          <h1 className="text-xl font-semibold text-gray-900">Doc AI</h1>
+          <h1 className="text-xl font-semibold text-gray-900">CaseBase</h1>
         </div>
       </div>
 
