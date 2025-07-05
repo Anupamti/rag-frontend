@@ -94,11 +94,12 @@ export default function ChatUI({
       <div className="border-t border-gray-200 bg-white p-4">
         <div className="max-w-3xl mx-auto">
           <ChatInput
-            value={inputValue}
-            onChange={setInputValue}
-            onSend={handleSendMessage}
-            disabled={isProcessing}
+            inputValue={inputValue}
+            setInputValue={setInputValue}
+            onSendMessage={handleSendMessage}
             onTranscribedText={onTranscribedText}
+            isProcessing={isProcessing}
+            hasFiles={false}
           />
         </div>
       </div>

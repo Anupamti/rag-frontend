@@ -5,7 +5,7 @@ import { Send, Mic, Square, FileText, Loader2 } from "lucide-react";
 
 interface ChatInputProps {
   inputValue: string;
-  setInputValue: React.Dispatch<React.SetStateAction<string>>;
+  setInputValue: (value: string) => void;
   onSendMessage: () => void;
   onTranscribedText: (text: string) => void;
   isProcessing: boolean;
